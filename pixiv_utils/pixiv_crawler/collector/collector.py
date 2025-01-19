@@ -33,13 +33,16 @@ class Collector:
         Collect all image ids in each artwork, and send to downloader
         NOTE: an artwork may contain multiple images
         """
-        if download_config.with_tag:
-            self.collect_metadata(selectMetadata, "metadata.json")
+        with futures.ThreadPoolExecutor(download_config.num_threads + 1) as executor:
+            if download_config.with_tag:
+                # Submit the collect_metadata task to the executor
+                metadata_future = executor.submit(
+                    self.collect_metadata, selectMetadata, "metadata.json"
+                )
 
-        printInfo("===== Collector start =====")
-        printInfo("NOTE: An artwork may contain multiple images.")
+            printInfo("===== Collector start =====")
+            printInfo("NOTE: An artwork may contain multiple images.")
 
-        with futures.ThreadPoolExecutor(download_config.num_threads) as executor:
             with tqdm.trange(len(self.id_group), desc="Collecting urls") as pbar:
                 urls = [
                     f"https://www.pixiv.net/ajax/illust/{illust_id}/pages?lang=zh"
@@ -61,6 +64,9 @@ class Collector:
                     if urls is not None:
                         self.downloader.add(urls)
                     pbar.update()
+
+            # Wait for the collect_metadata task to complete
+            futures.wait([metadata_future])
 
         printInfo("===== Collector complete =====")
         printInfo(f"Number of images: {len(self.downloader.url_group)}")
