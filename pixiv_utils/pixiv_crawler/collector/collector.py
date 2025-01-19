@@ -11,7 +11,7 @@ from pixiv_utils.pixiv_crawler.downloader import Downloader
 from pixiv_utils.pixiv_crawler.utils import printInfo
 
 from .collector_unit import collect
-from .selectors import selectPage, selectTag
+from .selectors import selectPage, selectTag, select_bookmark_data
 
 
 class Collector:
@@ -68,6 +68,8 @@ class Collector:
         """
         if download_config.with_tag:
             self.collectTags()
+        if download_config.bookmark:
+            self.collectBookmarkData()
 
         printInfo("===== Collector start =====")
         printInfo("NOTE: An artwork may contain multiple images.")
@@ -97,3 +99,36 @@ class Collector:
 
         printInfo("===== Collector complete =====")
         printInfo(f"Number of images: {len(self.downloader.url_group)}")
+
+    def collectBookmarkData(self, file_name: str = "bookmark_data.json"):
+        """
+        Collect artwork bookmark data and save in bookmark_data.json
+        """
+        printInfo("===== Bookmark data collector start =====")
+
+        self.bookmark_data: Dict[str, dict] = dict()
+        additional_headers = {"Referer": "https://www.pixiv.net/bookmark.php?type=user"}
+        collect_bookmark_data_fn = functools.partial(
+            collect, selector=select_bookmark_data, additional_headers=additional_headers
+        )
+        with futures.ThreadPoolExecutor(download_config.num_threads) as executor:
+            with tqdm.trange(len(self.id_group), desc="Collecting bookmark data") as pbar:
+                urls = [
+                    f"https://www.pixiv.net/artworks/{illust_id}" for illust_id in self.id_group
+                ]
+                for illust_id, bookmark_data in zip(
+                    self.id_group,
+                    executor.map(
+                        collect_bookmark_data_fn,
+                        urls,
+                    ),
+                ):
+                    if bookmark_data is not None:
+                        self.bookmark_data[illust_id] = bookmark_data
+                    pbar.update()
+
+        file_path = os.path.join(download_config.store_path, file_name)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(json.dumps(self.bookmark_data, indent=4, ensure_ascii=False))
+
+        printInfo("===== Bookmark data collector complete =====")

@@ -99,3 +99,23 @@ def selectKeyword(response: Response) -> Set[str]:
     for artwork in response.json()["body"]["illustManga"]["data"]:
         id_group.add(artwork["id"])
     return id_group
+
+
+def select_bookmark_data(response: Response) -> dict:
+    """
+    Collect bookmarkCount and bookmarkData from (artwork.html)
+    Sample url: https://www.pixiv.net/artworks/xxxxxx
+
+    Returns:
+        dict: {"bookmarkData":{},"bookmarkCount":0}
+    """
+    result = re.search(r"artworks/(\d+)", response.url)
+    assert result is not None, f"Bad response in select_bookmark_data for URL: {response.url}"
+
+    illust_id = result.group(1)
+    content = json.loads(
+        BeautifulSoup(response.text, "html.parser").find(id="meta-preload-data").get("content")
+    )
+    bookmark_count = content["illust"][illust_id]["bookmarkCount"]
+    bookmark_data = content["illust"][illust_id]["bookmarkData"]
+    return {"bookmarkData": bookmark_data, "bookmarkCount": bookmark_count}
