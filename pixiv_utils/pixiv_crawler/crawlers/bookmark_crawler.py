@@ -56,7 +56,10 @@ class BookmarkCrawler:
                 )
 
                 if response.status_code == requests.codes.ok:
-                    n_total = int(response.json()["body"]["public"][0]["cnt"])
+                    n_total = 0
+                    publics = response.json()["body"]["public"]
+                    for tag in publics:
+                        n_total += int(tag["cnt"])
                     self.n_images = min(self.n_images, n_total)
                     printInfo(f"Select {self.n_images}/{n_total} artworks")
                     printInfo("===== Request bookmark count complete =====")
@@ -84,7 +87,7 @@ class BookmarkCrawler:
         Args:
             artworks_per_json: Number of artworks per bookmark.json. Defaults to 48.
         """
-
+        artworks_per_json = min(artworks_per_json, self.n_images)
         n_page = (self.n_images - 1) // artworks_per_json + 1  # ceil
         printInfo(f"===== Start collecting {self.uid}'s bookmarks =====")
 
