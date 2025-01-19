@@ -9,7 +9,7 @@ from pixiv_utils.pixiv_crawler import (
     debug_config,
     download_config,
     network_config,
-    user_config,
+    user_config, PrivateBookmarkCrawler,
 )
 
 
@@ -42,7 +42,7 @@ class TestBookmarkCrawler(unittest.TestCase):
         download_config.url_only = False
 
         checkDir(download_config.store_path)
-        app = BookmarkCrawler(n_images=48, capacity=1024)
+        app = PrivateBookmarkCrawler(n_images=48, capacity=1024)
         result = app.run()
         #
         # self.assertGreater(len(app.downloader.url_group), 20)
