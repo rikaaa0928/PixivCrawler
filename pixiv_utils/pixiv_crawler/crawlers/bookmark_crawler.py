@@ -87,7 +87,7 @@ class BookmarkCrawler:
         Args:
             artworks_per_json: Number of artworks per bookmark.json. Defaults to 48.
         """
-        artworks_per_json = min(artworks_per_json, self.n_images)
+        # artworks_per_json = min(artworks_per_json, self.n_images)
         n_page = (self.n_images - 1) // artworks_per_json + 1  # ceil
         printInfo(f"===== Start collecting {self.uid}'s bookmarks =====")
 

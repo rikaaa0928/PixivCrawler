@@ -22,7 +22,7 @@ def downloadImage(url: str, download_time: float = 10) -> float:
     NOTE: The URL should be in the format "https://i.pximg.net/img-original/img/2022/05/11/00/00/12/98259515_p0.jpg"
     """
 
-    image_name = url[url.rfind("/") + 1 :]
+    image_name = url[url.rfind("/") + 1:]
     result = re.search(r"/(\d+)_", url)
     assertError(result is not None, "Bad url in image downloader")
     image_id = result.group(1)
@@ -33,7 +33,7 @@ def downloadImage(url: str, download_time: float = 10) -> float:
         printInfo(f"downloading {image_name}")
     time.sleep(download_config.thread_delay)
 
-    image_path = os.path.join(download_config.store_path, image_name)
+    image_path = os.path.join(download_config.store_path, image_id, image_name)
     if os.path.exists(image_path):
         assertWarn(not debug_config.verbose, f"{image_path} exists")
         return 0
@@ -59,7 +59,7 @@ def downloadImage(url: str, download_time: float = 10) -> float:
                     f.write(response.content)
                 if debug_config.verbose:
                     printInfo(f"{image_name} complete")
-                return image_size / 2**20
+                return image_size / 2 ** 20
 
         except Exception as e:
             assertWarn(not debug_config.show_error, e)
