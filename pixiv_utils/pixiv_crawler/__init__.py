@@ -7,7 +7,7 @@ from .config import (
     ranking_config,
     user_config,
 )
-from .crawlers import BookmarkCrawler, KeywordCrawler, RankingCrawler, UserCrawler
+from .crawlers import BookmarkCrawler, KeywordCrawler, RankingCrawler, UserCrawler, PrivateBookmarkCrawler
 from .downloader import Downloader, downloadImage
 from .utils import assertError, assertWarn, checkDir, printInfo, writeFailLog
 
@@ -32,6 +32,7 @@ __all__ = [
     "Downloader",
     "downloadImage",
     "BookmarkCrawler",
+    "PrivateBookmarkCrawler",
     "KeywordCrawler",
     "RankingCrawler",
     "UserCrawler",
