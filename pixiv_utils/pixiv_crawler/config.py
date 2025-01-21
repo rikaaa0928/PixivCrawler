@@ -78,6 +78,7 @@ class DownloadConfig:
     url_only: bool = False  # Only download artwork urls
     num_threads: int = 12  # Number of parallel threads
     thread_delay: float = 1  # Waiting time (s) after thread start
+    target_n: float  = 1
 
 
 ranking_config = RankingConfig()

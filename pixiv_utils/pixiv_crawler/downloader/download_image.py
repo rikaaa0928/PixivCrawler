@@ -7,6 +7,14 @@ import requests
 from pixiv_utils.pixiv_crawler.config import debug_config, download_config, network_config
 from pixiv_utils.pixiv_crawler.utils import assertError, assertWarn, printInfo, writeFailLog
 
+# PID parameters
+P = 0.5
+I = 0.1
+D = 0.05
+
+# Integral term and last error
+integral = 0
+last_error = 0
 
 def downloadImage(url: str, download_time: float = 10) -> float:
     """
@@ -59,6 +67,19 @@ def downloadImage(url: str, download_time: float = 10) -> float:
                     f.write(response.content)
                 if debug_config.verbose:
                     printInfo(f"{image_name} complete")
+                
+                # PID control
+                global integral, last_error
+                load_avg = os.getloadavg()[0]
+                error = load_avg - download_config.num_threads * download_config.target_n
+                integral += error
+                derivative = error - last_error
+                sleep_time = P * error + I * integral + D * derivative
+                last_error = error
+                if sleep_time > 0:
+                    printInfo(f"High load average detected: {load_avg}, sleeping for {sleep_time:.2f} seconds")
+                    time.sleep(sleep_time)
+                
                 return image_size / 2 ** 20
 
         except Exception as e:
